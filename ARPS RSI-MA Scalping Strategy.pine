@@ -1,0 +1,100 @@
+//@version=4
+study(title="ARPS RSI-MA Scalping Strategy", overlay=true)
+
+//*******************************************************************
+//MA Cross
+
+MAshort = sma(close, 7)
+MAlong = sma(close, 50)
+plot(MAshort, color = color.green, linewidth = 3)
+plot(MAlong, color = color.red, linewidth = 3)
+
+//plot(cross(short, long) ? short : na, style = plot.style_cross, linewidth = 4)
+
+//*******************************************************************
+//RSI Cross
+
+rsiShortLine = rsi(close, 102)
+rsiLongLine = sma(rsiShortLine, 204)
+
+//*******************************************************************
+//MA for Trends
+MAtrend1 = sma(security("BTCUSDT", "5", close), 200)
+MAtrend2 = sma(security("BTCUSDT", "15", close), 200)
+
+plot(MAtrend1, color=#b2b5be)
+plot(MAtrend2, color=color.black)
+//*******************************************************************
+//Signals
+MAtrend1DirectionUp = (MAtrend1 > MAtrend1[1]) and (MAtrend1[1] > MAtrend1[2]) and (MAtrend1[2] > MAtrend1[3]) and (MAtrend1[3] > MAtrend1[4])
+MAtrend1DirectionDown = (MAtrend1 < MAtrend1[1]) and (MAtrend1[1] < MAtrend1[2]) and (MAtrend1[2] < MAtrend1[3]) and (MAtrend1[3] < MAtrend1[4])
+
+MAtrend2DirectionUp = (MAtrend2 > MAtrend2[1]) and (MAtrend2[1] > MAtrend2[2]) and (MAtrend2[2] > MAtrend2[3]) and (MAtrend2[3] > MAtrend2[4])
+MAtrend2DirectionDown = (MAtrend2 < MAtrend2[1]) and (MAtrend2[1] < MAtrend2[2]) and (MAtrend2[2] < MAtrend2[3]) and (MAtrend2[3] < MAtrend2[4])
+
+//MA Crosses
+LongMACrossC = crossover(MAshort, MAlong)		//Current Candle
+ShortMACrossC = crossover(MAlong, MAshort)		//Current Candle
+
+LongMACrossP = crossover(MAshort[1], MAlong[1]) or crossover(MAshort[2], MAlong[2]) or crossover(MAshort[3], MAlong[3])		//3 Previous Candles (Long)
+ShortMACrossP = crossover(MAlong[1], MAshort[1]) or crossover(MAlong[2], MAshort[2]) or crossover(MAlong[3], MAshort[3])	//3 Previous Candles (Short)
+
+//RSI Crosses
+LongRsiCrossC = (rsiShortLine[1] < rsiLongLine [1] and rsiShortLine > rsiLongLine)		//Current Candle
+ShortRsiCrossC = (rsiShortLine[1] > rsiLongLine [1] and rsiShortLine < rsiLongLine)		//Current Candle
+
+LongRsiCrossP = (rsiShortLine[2] < rsiLongLine [2] and rsiShortLine[1] > rsiLongLine[1]) or (rsiShortLine[3] < rsiLongLine [3] and rsiShortLine[2] > rsiLongLine[2]) or (rsiShortLine[4] < rsiLongLine [4] and rsiShortLine[3] > rsiLongLine[3])	//3 Previous Candles (Long)
+ShortRsiCrossP = (rsiShortLine[2] > rsiLongLine [2] and rsiShortLine[1] < rsiLongLine[1]) or (rsiShortLine[3] > rsiLongLine [3] and rsiShortLine[2] < rsiLongLine[2]) or (rsiShortLine[4] > rsiLongLine [4] and rsiShortLine[3] < rsiLongLine[3])	//3 Previous Candles (Short)
+
+//Long Condition
+longCondition1 = (LongMACrossC and LongRsiCrossC)		// 20$
+longCondition2 = (LongMACrossC and LongRsiCrossP)		// 20$
+longCondition3 = (LongMACrossP and LongRsiCrossC)		// 20$
+
+longCondition4 = (longCondition1 or longCondition2 or longCondition3) and (MAtrend1DirectionUp or MAtrend2DirectionUp)		// 40$
+longCondition5 = (longCondition1 or longCondition2 or longCondition3) and (MAtrend1DirectionUp and MAtrend2DirectionUp)		// 60$
+
+
+//Short Condition
+shortCondition1 = (ShortMACrossC and ShortRsiCrossC)		// 20$
+shortCondition2 = (ShortMACrossC and ShortRsiCrossP)		// 20$
+shortCondition3 = (ShortMACrossP and ShortRsiCrossC)		// 20$
+
+shortCondition4 = (shortCondition1 or shortCondition2 or shortCondition3) and (MAtrend1DirectionDown or MAtrend2DirectionDown)		// 40$
+shortCondition5 = (shortCondition1 or shortCondition2 or shortCondition3) and (MAtrend1DirectionDown and MAtrend2DirectionDown)		// 60$
+
+//*******************************************************************
+//Labels
+
+if longCondition1
+	label1 = label.new(bar_index, high, text="Long Entry(1)(20$)", style=label.style_labeldown, color=#0CCD00 )
+if longCondition2
+	label1 = label.new(bar_index, high, text="Long Entry(2)(20$)", style=label.style_labeldown, color=#0CCD00 )	
+if longCondition3
+	label1 = label.new(bar_index, high, text="Long Entry(3)(20$)", style=label.style_labeldown, color=#0CCD00 )
+if longCondition4
+	label1 = label.new(bar_index, high, text="Long Entry(4)(40$)", style=label.style_labeldown, color=#0CCD00 )
+if longCondition5
+	label1 = label.new(bar_index, high, text="Long Entry(5)(60$)", style=label.style_labeldown, color=#0CCD00 )
+	
+	
+if shortCondition1
+	label2 = label.new(bar_index, low, text="Short Entry(1)(20$)", style=label.style_labelup, color=#FF0000 )
+	label.set_textcolor(label2, textcolor=color.white)
+if shortCondition2
+	label2 = label.new(bar_index, low, text="Short Entry(2)(20$)", style=label.style_labelup, color=#FF0000 )
+	label.set_textcolor(label2, textcolor=color.white)
+if shortCondition3
+	label2 = label.new(bar_index, low, text="Short Entry(3)(20$)", style=label.style_labelup, color=#FF0000 )
+	label.set_textcolor(label2, textcolor=color.white)
+if shortCondition4
+	label2 = label.new(bar_index, low, text="Short Entry(4)(40$)", style=label.style_labelup, color=#FF0000 )
+	label.set_textcolor(label2, textcolor=color.white)
+if shortCondition5
+	label2 = label.new(bar_index, low, text="Short Entry(5)(60$)", style=label.style_labelup, color=#FF0000 )
+	label.set_textcolor(label2, textcolor=color.white)
+//*******************************************************************
+//Alarms
+
+alertcondition(longCondition1 or longCondition2 or longCondition3 or longCondition4 or longCondition5, title='Long Signal', message='Signal for Long-Position Entry')
+alertcondition(shortCondition1 or shortCondition2 or shortCondition3 or shortCondition4 or shortCondition5, title='Short Signal', message='Signal for Short-Position Entry')
