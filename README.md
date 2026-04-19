@@ -1,3 +1,10 @@
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/d15879ab-db32-4105-9ddd-b5ec9f494ef6" 
+       alt="FileFlow"
+       width="60%" />
+</p>
+
+
 # ARPS RSI-MA Scalping Strategy
 **Originally created: August 02, 2020**
 *(Note: This script was created in 2020 but is being shared on GitHub on 2025-04-25)*
